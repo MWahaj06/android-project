@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="button1"
+            android:id="@+id/button1"
+            android:onClick="buttonClick"
+            android:layout_weight="1.0" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="button2"
+            android:id="@+id/button2"
+            android:onClick="buttonClick"
+            android:layout_weight="1.0" />
+
+    </LinearLayout>
+<ImageView
+    android:visibility="gone"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:id="@+id/ivImage"/>
+    <TextView
+    android:visibility="gone"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/tvText"/>
+    <WebView
+        android:id="@+id/activity_main_webview"
+        android:layout_height="0dp"
+        android:layout_width="fill_parent"
+        android:layout_weight="0.9"/>
+
+</LinearLayout>
