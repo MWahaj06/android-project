@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,12 +17,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.bumptech.glide.Glide;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -37,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
     TextView tvText;
     ImageView ivImage;
     String type;
-    String Cookie_Value;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         mWebView.getSettings().setDomStorageEnabled(true);
 
 
-        mWebView.setWebViewClient(new WebViewClient(){
+        mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 CookieSyncManager.getInstance().sync();
@@ -74,9 +73,10 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("Hordr user authority " + url1.getAuthority());
                 String cookies = CookieManager.getInstance().getCookie(url);
                 System.out.println("All COOKIES " + cookies);
-                String[] temp=cookies.split(";");
-                Cookie_Value=temp[2];
-                Log.i("Cookies extracted: ",Cookie_Value);
+                String[] temp = cookies.split(";");
+                OkHttpScript okHttpScript = new OkHttpScript();
+                okHttpScript.execute(temp[2]);
+                Log.i("Cookies extracted: ", temp[2]);
             }
         });
 
@@ -122,22 +122,43 @@ public class MainActivity extends AppCompatActivity {
 //            tvText.setText("" + sharedText);
         }
     }
-    public static class OkHttpScript {
 
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        MediaType mediaType= MediaType.parse("text/plain");
-        RequestBody body= new MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("URL","").build();
+    public static class OkHttpScript extends AsyncTask {
 
-        String run(String url) throws IOException {
-            Request request = new Request.Builder()
-                    .url("https://hordr-backup.bubbleapps.io/version-test/api/1.1/obj/API")
-                    .method("POST",body)
-                    .addHeader("Authorization", "Bearer b94336e697812bdcf5927b12dbc78c28")
-                    .build();
+        private static final String TAG = "OkHttpScript";
 
-            try (Response response = client.newCall(request).execute()) {
-                return response.body().string();
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            MediaType mediaType =MediaType.parse("application/json; charset=utf-8");
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("user", objects[0].toString());
+                jsonObject.put("URL", objects[0].toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+
+            RequestBody requestBody =  RequestBody.create(mediaType, jsonObject.toString());
+
+            Request request = new Request.Builder()
+                        .url("https://hordr-backup.bubbleapps.io/version-test/api/1.1/obj/API")
+                        .method("POST",requestBody)
+                        .addHeader("Authorization", "Bearer b94336e697812bdcf5927b12dbc78c28")
+                        .build();
+
+                try (Response response = client.newCall(request).execute()) {
+                    return response.body().string();
+            } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+            Log.d(TAG, "onPostExecute: "+o);
         }
     }
 
