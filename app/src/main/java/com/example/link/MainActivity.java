@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView ivImage;
     String type;
     String Cookie_Value;
+    String my_url;
 
 
     @Override
@@ -75,8 +78,11 @@ public class MainActivity extends AppCompatActivity {
                 String cookies = CookieManager.getInstance().getCookie(url);
                 System.out.println("All COOKIES " + cookies);
                 String[] temp=cookies.split(";");
-                Cookie_Value=temp[2];
-                Log.i("Cookies extracted: ",Cookie_Value);
+                String Original_Cookie=temp[2];
+                String modified_cookie= StringUtils.remove(Original_Cookie," hordr2_u1main=");
+                modified_cookie.trim();
+                Cookie_Value=modified_cookie;
+                System.out.println("Cookie_Value "+Cookie_Value);
             }
         });
 
@@ -89,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         mWebView.loadUrl("https://hordr.app/");
         handleIntent();
+        if(my_url!=null){System.out.println("URL from sharedText: "+ my_url);}
 
     }
 
@@ -116,30 +123,33 @@ public class MainActivity extends AppCompatActivity {
 
     void handleText(Intent intent) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        my_url=sharedText;
         if (sharedText != null) {
             mWebView.loadUrl(sharedText);
 //            tvText.setVisibility(View.VISIBLE);
 //            tvText.setText("" + sharedText);
         }
     }
-    public static class OkHttpScript {
-
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        MediaType mediaType= MediaType.parse("text/plain");
-        RequestBody body= new MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("URL","").build();
-
-        String run(String url) throws IOException {
-            Request request = new Request.Builder()
-                    .url("https://hordr-backup.bubbleapps.io/version-test/api/1.1/obj/API")
-                    .method("POST",body)
-                    .addHeader("Authorization", "Bearer b94336e697812bdcf5927b12dbc78c28")
-                    .build();
-
-            try (Response response = client.newCall(request).execute()) {
-                return response.body().string();
-            }
-        }
-    }
+//    public static class OkHttpScript {
+//
+//        OkHttpClient client = new OkHttpClient().newBuilder().build();
+//        MediaType mediaType= MediaType.parse("text/plain");
+//        RequestBody body= new MultipartBody.Builder().setType(MultipartBody.FORM)
+//                .addFormDataPart("URL","")
+//                .addFormDataPart("user",Cookie_Value).build();
+//
+//        String run(String url) throws IOException {
+//            Request request = new Request.Builder()
+//                    .url("https://hordr-backup.bubbleapps.io/version-test/api/1.1/obj/API")
+//                    .method("POST",body)
+//                    .addHeader("Authorization", "bearer b94336e697812bdcf5927b12dbc78c28")
+//                    .build();
+//
+//            try (Response response = client.newCall(request).execute()) {
+//                return response.body().string();
+//            }
+//        }
+//    }
 
 }
 
